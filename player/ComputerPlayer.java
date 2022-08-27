@@ -5,7 +5,7 @@ public class ComputerPlayer implements MNKPlayer{
     private int rows, cols, align;
     private boolean first;
     private int timeout;
-    private mnkTree mnkTree;
+    //private mnkTree mnkTree;
 
     public  ComputerPlayer(){
     }
@@ -15,7 +15,7 @@ public class ComputerPlayer implements MNKPlayer{
         this.cols = n;
         this.align = k;
         this.first = first;
-        this.mnkTree = new mnkTree(m, n, k, first);
+        //this.mnkTree = new mnkTree(m, n, k, first);
     }
 
     public MNKCell selectCell(MNKCell[] MC, MNKCell[] FC){
@@ -27,7 +27,3 @@ public class ComputerPlayer implements MNKPlayer{
     }
 
 }
-
-
-
-

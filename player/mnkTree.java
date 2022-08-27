@@ -1,14 +1,14 @@
 package player;
 
-import java.util.HashMap;
-import java.util.PriorityQueue;
 import mnkgame.*;
+/*import java.util.HashMap;
+import java.util.PriorityQueue;
 
 public class mnkTree {
-    
 
 
-    
+
+
     private int alphabeta(Node node, boolean myNode, int alpha, int beta) {
         if (node.isLeaf()) {
             return node.score;
@@ -40,4 +40,4 @@ public class mnkTree {
             return eval;
         }
     }
-}
+}*/
