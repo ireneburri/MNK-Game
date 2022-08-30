@@ -1,4 +1,3 @@
-
 package player;
 
 import mnkgame.*;
@@ -9,23 +8,23 @@ import java.lang.Math.*;
 public class MrRobot implements MNKPlayer{
 
     private Random rand;
-    private MNKBoard Board;
-    private boolean First;
+    private MNKBoard board;
+    private boolean first;
     private MNKGameState RobotWin;
     private MNKGameState HumanWin;
     private int TIMEOUT;
-    private long Seconds;
+    private long seconds;
 
 
     public  MrRobot(){
     }
 
-    public void initPlayer(int m, int n, int k, boolean First, int timeout){
+    public void initPlayer(int m, int n, int k, boolean first, int timeout){
 
       rand    = new Random(System.currentTimeMillis());
-      Board = new MNKBoard(m,n,k);
-      This.First = First;
-      RobotWin   = first ? MNKGameState.WINP1 : MNKGameState.WINP2;
+      board = new MNKBoard(m,n,k);
+      this.first = first;
+      RobotWin = first ? MNKGameState.WINP1 : MNKGameState.WINP2;
 		  HumanWin = first ? MNKGameState.WINP2 : MNKGameState.WINP1;
       TIMEOUT = timeout;
 
@@ -36,8 +35,8 @@ public class MrRobot implements MNKPlayer{
       long start = System.currentTimeMillis();
 
   		if(MC.length > 0) {
-  			MNKCell c = MC[MC.length-1]; // Recover the last move from MC
-  			B.markCell(c.i,c.j);         // Save the last move in the local MNKBoard
+  			MNKCell cell = MC[MC.length-1]; // Recover the last move from MC
+  			board.markCell(cell.i, cell.j); // Save the last move in the local MNKBoard
   		}
 
   		// If there is just one possible move, return immediately
@@ -46,12 +45,39 @@ public class MrRobot implements MNKPlayer{
 
       //se la prima mossa spetta al mio giocatore può essere effettuata randomicamente
       if(RobotWin == MNKGameState.WINP1 && MC.length==0){
-  			MNKCell Cell = FC[rand.nextInt(FC.length)];
-  			Board.markCell(Cell.i, Cell.j);
-  			return Cell;
+  			MNKCell cell = FC[rand.nextInt(FC.length)];
+  			board.markCell(cell.i, cell.j);
+  			return cell;
   		}
 
-      //chiamata di alphabeta
+      int score = 0;
+      double maxEval = Integer.MIN_VALUE;
+      int pos = rand.nextInt(FC.length); 
+      MNKCell result = FC[pos]; // random move
+      
+      for(MNKCell potentialCell : FC) {
+        
+        // If time is running out, return the randomly selected  cell
+              if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)) {
+          break;
+          
+        }else{
+          
+          board.markCell(potentialCell.i, potentialCell.j);	
+          
+          score = alphabeta(board, true, 5, Integer.MIN_VALUE, Integer.MAX_VALUE, start, TIMEOUT, first);
+          
+          if(score > maxEval){
+            maxEval = score;
+            result = potentialCell;
+          }
+          
+          board.unmarkCell();								
+        }	
+      }
+      
+      board.markCell(result.i, result.j);		
+      return result;
 
     }
 
