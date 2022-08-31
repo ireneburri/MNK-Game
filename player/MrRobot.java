@@ -58,14 +58,12 @@ public class MrRobot implements MNKPlayer{
       for(MNKCell potentialCell : FC) {
         
         // If time is running out, return the randomly selected  cell
-              if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)) {
-          break;
-          
-        }else{
+        //if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)) {
+        //break;
           
           board.markCell(potentialCell.i, potentialCell.j);	
           
-          score = alphabeta(board, true, 5, Integer.MIN_VALUE, Integer.MAX_VALUE, start, TIMEOUT, first);
+          score = alphabeta(board, true, k, Integer.MIN_VALUE, Integer.MAX_VALUE, start, TIMEOUT, first);
           
           if(score > maxEval){
             maxEval = score;
@@ -74,11 +72,9 @@ public class MrRobot implements MNKPlayer{
           
           board.unmarkCell();								
         }	
-      }
       
       board.markCell(result.i, result.j);		
       return result;
-
     }
 
     public String playerName(){
