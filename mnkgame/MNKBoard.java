@@ -1,8 +1,8 @@
 /*
  *  Copyright (C) 2021 Pietro Di Lena
- *  
+ *
  *  This file is part of the MNKGame v2.0 software developed for the
- *  students of the course "Algoritmi e Strutture di Dati" first 
+ *  students of the course "Algoritmi e Strutture di Dati" first
  *  cycle degree/bachelor in Computer Science, University of Bologna
  *  A.Y. 2020-2021.
  *
@@ -32,8 +32,8 @@ import java.util.HashSet;
  * <p>
  * The MNKBoard class allows only alternates moves between two players. It mantains the ordered
  * list of moves and allows undoes.
- * 
- * </p> 
+ *
+ * </p>
  */
 public class MNKBoard {
 	/**
@@ -49,7 +49,7 @@ public class MNKBoard {
    */
 	public final int K;
 
-	protected final MNKCellState[][]    B;
+	public final MNKCellState[][]    B;
 	protected final LinkedList<MNKCell> MC;  // Marked Cells
 	protected final HashSet<MNKCell>    FC;  // Free Cells
 
@@ -57,11 +57,11 @@ public class MNKBoard {
 
 	protected int          currentPlayer;   // currentPlayer plays next move
 
-	protected MNKGameState gameState;       // game state
-	
+	public MNKGameState gameState;       // game state
+
 	/**
    * Create a board of size MxN and initialize the game parameters
-   * 
+   *
    * @param M Board rows
 	 * @param N Board columns
 	 * @param K Number of symbols to be aligned (horizontally, vertically, diagonally) for a win
@@ -79,7 +79,7 @@ public class MNKBoard {
 
 		B  = new MNKCellState[M][N];
 		// Initial capacity large enough to assure load factor < 0.75
-		FC = new HashSet<MNKCell>((int) Math.ceil((M*N) / 0.75)); 
+		FC = new HashSet<MNKCell>((int) Math.ceil((M*N) / 0.75));
 		MC = new LinkedList<MNKCell>();
 
 		reset();
@@ -95,7 +95,7 @@ public class MNKBoard {
 		initFreeCellList();
 		initMarkedCellList();
 	}
-	
+
 	/**
 	 * Returns the state of cell <code>i,j</code>
    *
@@ -122,23 +122,23 @@ public class MNKBoard {
   }
 
 	/**
-	 * Returns the id of the player allowed to play next move. 
+	 * Returns the id of the player allowed to play next move.
 	 *
 	 * @return 0 (first player) or 1 (second player)
 	 */
 	public int currentPlayer() {
-		return currentPlayer;	
+		return currentPlayer;
 	}
-	
+
 	/**
    * Marks the selected cell for the current player
    *
    * @param i i-th row
 	 * @param j j-th column
-   * 
+   *
 	 * @return State of the game after the move
-	 * 
-	 * @throws IndexOutOfBoundsException If <code>i,j</code> are out of matrix bounds 
+	 *
+	 * @throws IndexOutOfBoundsException If <code>i,j</code> are out of matrix bounds
 	 * @throws IllegalStateException If the game already ended or if <code>i,j</code> is not a free cell
    */
 	public MNKGameState markCell(int i, int j) throws IndexOutOfBoundsException, IllegalStateException {
@@ -156,14 +156,14 @@ public class MNKBoard {
 
 			FC.remove(oldc);
 			MC.add(newc);
-			
+
 			currentPlayer = (currentPlayer + 1) % 2;
 
 			if(isWinningCell(i,j))
 				gameState =  B[i][j] == MNKCellState.P1 ? MNKGameState.WINP1 : MNKGameState.WINP2;
 			else if(FC.isEmpty())
 				gameState = MNKGameState.DRAW;
-			
+
 			return gameState;
 		}
   }
@@ -181,7 +181,7 @@ public class MNKBoard {
 			MNKCell newc = new MNKCell(oldc.i,oldc.j,MNKCellState.FREE);
 
 			B[oldc.i][oldc.j] = MNKCellState.FREE;
-			
+
 			FC.add(newc);
 			currentPlayer = (currentPlayer + 1) % 2;
 			gameState     = MNKGameState.OPEN;
@@ -193,7 +193,7 @@ public class MNKBoard {
 	 * <p>This is the history of the game: the first move is in the
 	 * array head, the last move in the array tail.</p>
 	 * @return List of marked cells
-	 */ 
+	 */
 	public MNKCell[] getMarkedCells() {
 		return MC.toArray(new MNKCell[MC.size()]);
 	}
@@ -214,7 +214,7 @@ public class MNKBoard {
 				B[i][j] = MNKCellState.FREE;
 	}
 
-	// Rebuilds the free cells set 
+	// Rebuilds the free cells set
 	private void initFreeCellList() {
 		this.FC.clear();
 		for(int i = 0; i < M; i++)
@@ -238,7 +238,7 @@ public class MNKBoard {
 		// Horizontal check
 		n = 1;
 		for(int k = 1; j-k >= 0 && B[i][j-k] == s; k++) n++; // backward check
-		for(int k = 1; j+k <  N && B[i][j+k] == s; k++) n++; // forward check   
+		for(int k = 1; j+k <  N && B[i][j+k] == s; k++) n++; // forward check
 		if(n >= K) return true;
 
 		// Vertical check
@@ -246,7 +246,7 @@ public class MNKBoard {
 		for(int k = 1; i-k >= 0 && B[i-k][j] == s; k++) n++; // backward check
 		for(int k = 1; i+k <  M && B[i+k][j] == s; k++) n++; // forward check
 		if(n >= K) return true;
-		
+
 
 		// Diagonal check
 		n = 1;

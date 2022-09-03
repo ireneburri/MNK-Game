@@ -8,6 +8,8 @@ import java.lang.Math.*;
 import java.util.LinkedList;
 import java.util.HashSet;
 
+//MODIFICA CAMPI PROTECTED/PUBLIC !!!!
+
 public class MrRobot implements MNKPlayer{
 
     private Random rand;
@@ -33,7 +35,6 @@ public class MrRobot implements MNKPlayer{
 
     }
 
-
     public MNKCell selectCell(MNKCell[] MC, MNKCell[] FC){
 
       long start = System.currentTimeMillis();
@@ -54,8 +55,7 @@ public class MrRobot implements MNKPlayer{
   			return cell;
   		}
 
-      int score = 0;
-      double maxEval = Integer.MIN_VALUE;
+      double score = 0, maxEval = Integer.MIN_VALUE;
       int pos = rand.nextInt(FC.length);
       MNKCell result = FC[pos]; // random move
 
@@ -127,7 +127,7 @@ public class MrRobot implements MNKPlayer{
 
       //mia vittoria
   		if(board.gameState == myWin){
-  			eval = 2;
+  			eval = 100;
       }
       //vittoria dell'avversario
       else if(board.gameState == yourWin){
@@ -135,16 +135,17 @@ public class MrRobot implements MNKPlayer{
   		}
       //pareggio
       else if(board.gameState == MNKGameState.DRAW){
-  			eval = 1;
+  			eval = -100;
   		}
-      else{ eval = scoreNotLeaf(board);
+      else{
+        eval = scoreNotLeaf(board);
       }
 
   		return eval;
   	}
 
     public double scoreNotLeaf(MNKBoard board){
-  		double eval;
+  		double eval = 0;
 
       //prendiamo l'ultima cella marcata
   		MNKCell[] MC = board.getMarkedCells();
@@ -152,7 +153,7 @@ public class MrRobot implements MNKPlayer{
 
   		MNKCellState[][] cloneBoard = new MNKCellState[board.M][board.N];
 
-      //DA RIFARE: riga, colonna, diagonale e antidiagonale possiamo prenderle direttamente dalla matrice originale
+      //DA RIFARE: riga, colonna, diagonale e antidiagonale possiamo prenderle direttamente dalla matrice originale !!!!!!
       //copiato la board originale su una nuova matrice
   		for(int i = 0; i < board.M; i++){
   			for(int j = 0; j < board.N; j++){
@@ -168,7 +169,7 @@ public class MrRobot implements MNKPlayer{
   		if(board.M >= board.K){
   			MNKCellState[] row;
         row = cloneBoard[lastCell.i];
-  			eval += scoreLine(row);
+  			eval += scoreLine(row, lastCell);
   			//row = null;
   		}
 
@@ -177,75 +178,132 @@ public class MrRobot implements MNKPlayer{
   		if(board.N >= board.K){
   			MNKCellState[] col;
   			col = cloneBoard[lastCell.j];
-  			eval += scoreLine(col);
+  			eval += scoreLine(col, lastCell);
   			//row = null;
   		}
 
       //valuto la diagonale con l'ultima cella marcata
-      //controlla che ci sono almeno k celle in quella colonna
+      //controlla che ci sono almeno k celle in quella colonna !!!!!!!!!
 
       //valuto la diagonale opposta con l'ultima cella marcata
-      //controlla che ci sono almeno k celle in quella colonna
+      //controlla che ci sono almeno k celle in quella colonna !!!!!!!!!!!
 
+      return eval;
   	}
 
-    /*ritorna la somma dei punti che abbiamo assegnato a varie configurazioni favorevoli o sfavorevoli per il nostro giocatore
-      configurazioni favorevoli per noi:
-        -Turno Mio, sottovettore massimo mio lungo k elementi - punteggio
-        -Turno Mio, sottovettore massimo avversario lungo k-x senza celle libere di fianco (punteggio alto, vuol dire che lo hai bloccato)
-        -Turno Suo, ho k-x celle Mie occupate con celle libere accanto (punteggio alto inversamente proporzionale alla x)
-      configurazioni sfavorevoli per noi:
-        -Turno Mio, sottovettore massimo avversario lungo k-1 con celle libere di fianco (punteggio basso)
-        -Turno Suo, sottovettore massimo mio lungo k-x senza celle libere di fianco (punteggio alto, vuol dire che mi ha bloccato)
-        -Turno Suo, ho k-x celle Mie occupate senza celle libere accanto (punteggio basso perchè per qualsiasi x non vinciamo)
+    /*
+    Turno mio (lastCell.state==IO)
+        1-ho sottovettoremax >= k (con celle occupate > k/2) 40
+        2-ho sottovettoremax >= k (con celle occupate < k/2) 20
+        3-ho bloccato suo sottovett >= k (con celle occ > k/2) 60
+        4-ho bloccato suo sottovett >= k (con celle occ < k/2) 20
+
+    Turno avversario (lastCell.state==AVVERSARIO)
+        5-ha bloccato mio sottovett >= k (con celle occ > k/2) -60
+        6-ha bloccato mio sottovett >= k (con celle occ > k/2) -40
+
+      Vittoria mia 100
+      Avverasio -100
+      Pareggio 0
     */
-    public double scoreLine(MNKCellState[] line){
+    public double scoreLine(MNKCellState[] line, MNKCell lastCell){
 
-      double sumScore;
-      int[] index= new int[2];
+      double sumScore = 0;
+      values values = maxSubVector(line, lastCell);
 
+      //valutazioni delle varie cinfigurazioni nel caso in cui la cella appena posizionata sia MIA
+      //DA MODIFICARE LA CONDIZIONE !!!!!
+      if (first) {
+        if ((values.maxEnd-values.maxStart)+1 >= board.K){
+          //caso 1
+          if (values.totSelectedCell > board.K/2) sumScore+=40;
+          //caso 2
+          else sumScore+=20;
 
-      for (int i=0; i< line.length; i++){
+//RIFAI MAXSUBVECTOR DOVE CONTROLLA SOLO LE CELLE SEGNATE (NON LIBERE) per fare i casi in cui te o lui siete a k-1 quindi dopo potresti vincere o perdere
+
+        }
+
+      }
+      //valutazioni delle configurazioni nel caso in cui la cella appena posizionata sia dell'AVVERSARIO
+      else {
 
       }
 
+      return sumScore;
   	}
 
+    //classe per ritornare i valori del metodo maxSubVector
+    final class values {
+        public int maxStart;   //PUBLIC?    !!!!!
+        public int maxEnd;
+        public int totSelectedCell;
+        public int totFreeCell;
+
+        public values(int maxStart, int maxEnd, int totSelectedCell, int totFreeCell){
+            this.maxStart = maxStart;
+            this.maxEnd = maxEnd;
+            this.totSelectedCell = totSelectedCell;
+            this.totFreeCell = totFreeCell;
+        }
+    }
+
+//RICORDA CHE GLI DEVI PASSARE L'ARRAY SENZA LA CELLA SELEZIONATA PER CAPIRE SE SEI STATO BLOCCATO O BLOCCHI QUALCUNO !!!!
+
     //restitusco l'indice di inizio e di fine del sottovettore massimo costituito dalle celle marcate dal giocatore P e quelle vuote
-    public int[] maxSubVector(MNKCellState[] line, MNKCellState P){
+    public values maxSubVector(MNKCellState[] line, MNKCell lastCell){
 
       int lenght = 0, maxLenght = 0, start = 0, maxStart = 0, end = 0, maxEnd = 0;
+      int selectedCell = 0, freeCell = 0, totSelectedCell = 0, totFreeCell = 0;
+      MNKCellState current_player = lastCell.state;
+      MNKCellState opposite_player = (current_player == MNKCellState.P1) ? MNKCellState.P2 : MNKCellState.P1;
 
       for (int i=0; i<=line.length-1; i++){
 
-        if (line[i]== P || line[i]== MNKCellState.FREE){
+        if (line[i] == lastCell.state || line[i] == MNKCellState.FREE){
           lenght = lenght + 1;
           end = i;
+
+          if (line[i] == lastCell.state) selectedCell++;
+          else freeCell++;
 
           if (lenght>maxLenght){
             maxLenght = lenght;
             maxStart = start;
             maxEnd = end;
+
+            totSelectedCell = selectedCell;
+            totFreeCell = freeCell;
           }
         }
         else {
           lenght = 0;
           start = i+1;
           end = i+1;
+
+          selectedCell = 0;
+          freeCell = 0;
         }
       }
 
-      if (line[line.length-1]==P || line[line.length-1]==MNKCellState.FREE){
+      if (line[line.length-1] == lastCell.state || line[line.length-1] == MNKCellState.FREE){
         lenght = lenght + 1;
         end = line.length;
 
+        if (line[line.length-1] == lastCell.state) selectedCell++;
+        else freeCell++;
+
         if (lenght>maxLenght){
           maxLenght = lenght;
+          maxStart = start;
+          maxEnd = end;
+
+          totSelectedCell = selectedCell;
+          totFreeCell = freeCell;
         }
       }
 
-      int[] index = {maxStart, maxEnd};
-      return index;
+      return new values(maxStart, maxEnd, totSelectedCell, totFreeCell);
     }
 
     public String playerName(){
