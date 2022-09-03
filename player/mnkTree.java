@@ -1,4 +1,4 @@
-package player;
+/*package player;
 
 import mnkgame.*;
 import java.util.Random;
@@ -115,5 +115,5 @@ public class mnkTree {
 
 	}
 
-
 }
+*/

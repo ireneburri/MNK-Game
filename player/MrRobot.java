@@ -33,6 +33,7 @@ public class MrRobot implements MNKPlayer{
 
     }
 
+
     public MNKCell selectCell(MNKCell[] MC, MNKCell[] FC){
 
       long start = System.currentTimeMillis();
@@ -61,19 +62,18 @@ public class MrRobot implements MNKPlayer{
       for(MNKCell potentialCell : FC) {
 
         // If time is running out, return the randomly selected  cell
-        //if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)) {
-        //break;
+        // if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)) {
+        // break;
 
-          board.markCell(potentialCell.i, potentialCell.j);
+        board.markCell(potentialCell.i, potentialCell.j);
+        score = alphabeta(board, true, board.K, Integer.MIN_VALUE, Integer.MAX_VALUE, start, TIMEOUT, first);
 
-          score = alphabeta(board, true, board.K, Integer.MIN_VALUE, Integer.MAX_VALUE, start, TIMEOUT, first);
+        if(score > maxEval){
+          maxEval = score;
+          result = potentialCell;
+        }
 
-          if(score > maxEval){
-            maxEval = score;
-            result = potentialCell;
-          }
-
-          board.unmarkCell();
+        board.unmarkCell();
         }
 
       board.markCell(result.i, result.j);
@@ -83,28 +83,29 @@ public class MrRobot implements MNKPlayer{
     //alphabeta pruning
   	public double alphabeta(MNKBoard board, boolean node, int depth, double alpha, double beta, long start, int timeout, boolean first){
 
-  		double eval;
+      double eval;
   		MNKCell fc[] = board.getFreeCells();
-  		if (depth>8) depth = 8;
+
+      //poniamo un limite alla profondità dell'albero
+      if (depth>8) depth = 8;
 
   		if(depth <= 0 || board.gameState != MNKGameState.OPEN || (System.currentTimeMillis()-start)/1000.0 > timeout*(99.0/100.0)){
-  			eval = scoring(board, depth, first);
+        eval = scoring(board, depth, first);
   		}
-
-      	else if(node){
-  			eval = Integer.MAX_VALUE;
+    	else if(node){
+        eval = Integer.MAX_VALUE;
 
   			for(MNKCell cell : fc){
   				board.markCell(cell.i, cell.j);
   				eval = Math.min(eval, alphabeta(board, false, depth-1, alpha, beta, start, timeout, first));
   				beta = Math.min(eval, beta);
   				board.unmarkCell();
+
   				if(beta <= alpha)
   					break;
   			}
   		}
-
-     		 else{
+      else{
   			eval = Integer.MIN_VALUE;
 
   			for(MNKCell cell : fc){
@@ -112,39 +113,48 @@ public class MrRobot implements MNKPlayer{
   				eval = Math.max(eval, alphabeta(board, true, depth-1, alpha, beta, start, timeout, first));
   				beta = Math.max(eval, alpha);
   				board.unmarkCell();
+
   				if(beta <= alpha)
   					break;
   			}
   		}
-
-  		return eval;
+      return eval;
   	}
 
-    public double scoring(MNKBoard board, int depth, boolean first){ //valutazione board
+    //valutazione board
+    public double scoring(MNKBoard board, int depth, boolean first){
   		double eval;
 
-  		if(board.gameState == myWin){ //mia vittoria
+      //mia vittoria
+  		if(board.gameState == myWin){
   			eval = 2;
-  		}else if(board.gameState == yourWin){ //vittoria dell'avversario
+      }
+      //vittoria dell'avversario
+      else if(board.gameState == yourWin){
   			eval = 0;
-  		}else if(board.gameState == MNKGameState.DRAW){ //pareggio
-  			eval = 1;
-  		}else{
-  			eval = scoreNotLeaf(board);
   		}
+      //pareggio
+      else if(board.gameState == MNKGameState.DRAW){
+  			eval = 1;
+  		}
+      else{ eval = scoreNotLeaf(board);
+      }
+
   		return eval;
   	}
 
     public double scoreNotLeaf(MNKBoard board){
   		double eval;
 
-  		MNKCell[] MC = board.getMarkedCells(); //prendiamo l'ultima cella marcata
+      //prendiamo l'ultima cella marcata
+  		MNKCell[] MC = board.getMarkedCells();
   		MNKCell lastCell = MC[MC.length-1];
 
   		MNKCellState[][] cloneBoard = new MNKCellState[board.M][board.N];
 
-      //RIGHE E COLONNA PRESA DALLA MATRICE ORIGINALE
-  		for(int i = 0; i < board.M; i++){ //copiato la board originale su una nuova matrice
+      //DA RIFARE: riga, colonna, diagonale e antidiagonale possiamo prenderle direttamente dalla matrice originale
+      //copiato la board originale su una nuova matrice
+  		for(int i = 0; i < board.M; i++){
   			for(int j = 0; j < board.N; j++){
   				cloneBoard[i][j] = MNKCellState.FREE;
   			}
@@ -153,26 +163,47 @@ public class MrRobot implements MNKPlayer{
   			cloneBoard[MC[p].i][MC[p].j] = MC[p].state;
   		}
 
-  		//valuto riga con ultima cella marcata
-  		if(board.M >= board.K){ //controlla che ci sono almeno k celle in quella riga
+  		//valuto la riga con ultima cella marcata
+      //controlla che ci siano almeno k celle in quella riga
+  		if(board.M >= board.K){
   			MNKCellState[] row;
-
-  			row = cloneBoard[lastCell.i];
+        row = cloneBoard[lastCell.i];
   			eval += scoreLine(row);
   			//row = null;
   		}
 
+      //valuto la colonna con l'ultima cella marcata
+      //controlla che ci sono almeno k celle in quella colonna
   		if(board.N >= board.K){
   			MNKCellState[] col;
-
   			col = cloneBoard[lastCell.j];
   			eval += scoreLine(col);
   			//row = null;
   		}
+
+      //valuto la diagonale con l'ultima cella marcata
+      //controlla che ci sono almeno k celle in quella colonna
+
+      //valuto la diagonale opposta con l'ultima cella marcata
+      //controlla che ci sono almeno k celle in quella colonna
+
   	}
 
+    /*ritorna la somma dei punti che abbiamo assegnato a varie configurazioni favorevoli o sfavorevoli per il nostro giocatore
+      configurazioni favorevoli per noi:
+        -Turno Mio, sottovettore massimo mio lungo k elementi - punteggio
+        -Turno Mio, sottovettore massimo avversario lungo k-x senza celle libere di fianco (punteggio alto, vuol dire che lo hai bloccato)
+        -Turno Suo, ho k-x celle Mie occupate con celle libere accanto (punteggio alto inversamente proporzionale alla x)
+      configurazioni sfavorevoli per noi:
+        -Turno Mio, sottovettore massimo avversario lungo k-1 con celle libere di fianco (punteggio basso)
+        -Turno Suo, sottovettore massimo mio lungo k-x senza celle libere di fianco (punteggio alto, vuol dire che mi ha bloccato)
+        -Turno Suo, ho k-x celle Mie occupate senza celle libere accanto (punteggio basso perchè per qualsiasi x non vinciamo)
+    */
     public double scoreLine(MNKCellState[] line){
+
       double sumScore;
+      int[] index= new int[2];
+
 
       for (int i=0; i< line.length; i++){
 
@@ -180,7 +211,42 @@ public class MrRobot implements MNKPlayer{
 
   	}
 
+    //restitusco l'indice di inizio e di fine del sottovettore massimo costituito dalle celle marcate dal giocatore P e quelle vuote
+    public int[] maxSubVector(MNKCellState[] line, MNKCellState P){
 
+      int lenght = 0, maxLenght = 0, start = 0, maxStart = 0, end = 0, maxEnd = 0;
+
+      for (int i=0; i<=line.length-1; i++){
+
+        if (line[i]== P || line[i]== MNKCellState.FREE){
+          lenght = lenght + 1;
+          end = i;
+
+          if (lenght>maxLenght){
+            maxLenght = lenght;
+            maxStart = start;
+            maxEnd = end;
+          }
+        }
+        else {
+          lenght = 0;
+          start = i+1;
+          end = i+1;
+        }
+      }
+
+      if (line[line.length-1]==P || line[line.length-1]==MNKCellState.FREE){
+        lenght = lenght + 1;
+        end = line.length;
+
+        if (lenght>maxLenght){
+          maxLenght = lenght;
+        }
+      }
+
+      int[] index = {maxStart, maxEnd};
+      return index;
+    }
 
     public String playerName(){
         return "MrRobot";
