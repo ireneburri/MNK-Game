@@ -49,7 +49,7 @@ public class MNKBoard {
    */
 	public final int K;
 
-	public final MNKCellState[][]    B;
+	protected final MNKCellState[][]    B;
 	protected final LinkedList<MNKCell> MC;  // Marked Cells
 	protected final HashSet<MNKCell>    FC;  // Free Cells
 
@@ -57,7 +57,7 @@ public class MNKBoard {
 
 	protected int          currentPlayer;   // currentPlayer plays next move
 
-	public MNKGameState gameState;       // game state
+	protected MNKGameState gameState;       // game state
 
 	/**
    * Create a board of size MxN and initialize the game parameters
