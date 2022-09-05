@@ -1,8 +1,8 @@
 /*
  *  Copyright (C) 2021 Pietro Di Lena
- *  
+ *
  *  This file is part of the MNKGame v2.0 software developed for the
- *  students of the course "Algoritmi e Strutture di Dati" first 
+ *  students of the course "Algoritmi e Strutture di Dati" first
  *  cycle degree/bachelor in Computer Science, University of Bologna
  *  A.Y. 2020-2021.
  *
@@ -52,7 +52,7 @@ public class MNKGame extends JFrame {
 	private final int CELL_PADDING;        // Padding for CROSS/NOUGHTS
 	private final int SYMBOL_SIZE;         // width/height
 	private final int SYMBOL_STROKE_WIDTH; // pen's stroke width
-	
+
 	private final int BOARD_WIDTH;
 	private final int BOARD_HEIGHT;
 
@@ -80,7 +80,7 @@ public class MNKGame extends JFrame {
 	private MNKGame(int M, int N, int K, MNKGameType type) {
 		gameType = type;
     B        = new MNKBoard(M,N,K);
-	
+
 		GRID_WIDTH          = CELL_SIZE/10;  // Grid-line's width
 		GRID_WIDTH_HALF     = GRID_WIDTH/2;  // Grid-line's half-width
 		CELL_PADDING        = CELL_SIZE/10;  // Padding for CROSS/NOUGHTS
@@ -95,23 +95,23 @@ public class MNKGame extends JFrame {
 
 		// Add MouseEvent upon mouse-click
 		board.addMouseListener(new MNKMouseAdapter());
- 
+
 		// Setup the status bar (JLabel) to display status message
 		statusBar = new JLabel("  ");
 		statusBar.setFont(new Font(Font.DIALOG_INPUT, Font.BOLD, 15));
  		statusBar.setBorder(BorderFactory.createEmptyBorder(2, 5, 4, 5));
- 
+
 		Container cp = getContentPane();
 		cp.setLayout(new BorderLayout());
 		cp.add(board, BorderLayout.CENTER);
-		cp.add(statusBar, BorderLayout.PAGE_END); 
+		cp.add(statusBar, BorderLayout.PAGE_END);
 
- 
+
 		setResizable(false); // window not resizable
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		pack();  // pack all the components in this JFrame
 
-		initGame(); // initialize board and variables	
+		initGame(); // initialize board and variables
 	}
 
 	private class MNKMouseAdapter extends MouseAdapter {
@@ -124,7 +124,7 @@ public class MNKGame extends JFrame {
 				this.P = P;
 				this.B = B;
 			}
-	
+
 			public MNKCell call()  throws InterruptedException {
 				return P.selectCell(B.getFreeCells(),B.getMarkedCells());
 			}
@@ -149,22 +149,22 @@ public class MNKGame extends JFrame {
 
 					MNKCell c = null;
 
-					try { 
+					try {
 						// TIMEOUT secs + 10% more time
-  					c = task.get((int)(TIMEOUT+0.1*TIMEOUT), TimeUnit.SECONDS); 
+  					c = task.get((int)(TIMEOUT+0.1*TIMEOUT), TimeUnit.SECONDS);
 					}
 					catch(TimeoutException ex) {
-						executor.shutdownNow();	
+						executor.shutdownNow();
 						System.err.println(ComPlayer[curr].playerName() + " interrupted due to timeout");
 						System.exit(1);
 					}
-					catch (Exception ex) { 
+					catch (Exception ex) {
 						System.err.println("Error: " + ComPlayer[curr].playerName() + " interrupted due to exception");
 						System.err.println(" " + ex);
 						System.exit(1);
 					}
 					if (!executor.isTerminated())
-    				executor.shutdownNow(); 
+    				executor.shutdownNow();
 
 					if(B.cellState(c.i,c.j) == MNKCellState.FREE) {
 						B.markCell(c.i,c.j);
@@ -178,13 +178,13 @@ public class MNKGame extends JFrame {
 			}
 			repaint();
 		}
-	} 
+	}
 
 	private void selectPlayerTurn() {
-		if(Player[0] == null) { 
+		if(Player[0] == null) {
 			if(gameType == MNKGameType.HUMANvsHUMAN) {
-				Player[0] = MNKPlayerType.HUMAN; 
-				Player[1] = MNKPlayerType.HUMAN; 
+				Player[0] = MNKPlayerType.HUMAN;
+				Player[1] = MNKPlayerType.HUMAN;
 			} else if(gameType == MNKGameType.HUMANvsCOMPUTER) {
 				Player[0] = MNKPlayerType.COMPUTER;
 				Player[1] = MNKPlayerType.HUMAN;
@@ -207,11 +207,11 @@ public class MNKGame extends JFrame {
 		// Timed-out initializaton of the MNKPlayer
 		if(gameType != MNKGameType.HUMANvsHUMAN) {
 			for(int k = 0; k < 2; k++) {
-				final int i = k; // need to have a final variable here 
-				if(ComPlayer[i] != null) {	
+				final int i = k; // need to have a final variable here
+				if(ComPlayer[i] != null) {
 					final Runnable initPlayer = new Thread() {
-		 				@Override 
-						public void run() { 
+		 				@Override
+						public void run() {
 							ComPlayer[i].initPlayer(B.M,B.N,B.K,i == 0,TIMEOUT);
 						}
 					};
@@ -219,17 +219,17 @@ public class MNKGame extends JFrame {
 					final ExecutorService executor = Executors.newSingleThreadExecutor();
 					final Future future = executor.submit(initPlayer);
 					executor.shutdown();
-					try { 
+					try {
 						// TIMEOUT secs + 10% more time
- 			 			future.get((int)(TIMEOUT + 0.1*TIMEOUT), TimeUnit.SECONDS); 
-					} 
+ 			 			future.get((int)(TIMEOUT + 0.1*TIMEOUT), TimeUnit.SECONDS);
+					}
 					catch (TimeoutException e) {
 						System.err.println("Error: " + ComPlayer[i].playerName() + " interrupted: initialization takes too much time");
 						System.exit(1);
 					}
-					catch (Exception e) { 
+					catch (Exception e) {
 						System.err.println(e);
-						System.exit(1);		
+						System.exit(1);
 					}
 					if (!executor.isTerminated())
  		   			executor.shutdownNow();
@@ -243,11 +243,11 @@ public class MNKGame extends JFrame {
 		String P2 = Player[1] == MNKPlayerType.HUMAN ? "Human" : ComPlayer[1].playerName();
 		setTitle("(" + B.M + "," + B.N + "," + B.K + ")-Game   " + P1 + " vs " + P2);
     setVisible(true);  // show this JFrame
-			
+
 		repaint();
 	}
- 
- 
+
+
 	/**
 	 *  Inner class for custom graphics drawing.
 	 */
@@ -256,7 +256,7 @@ public class MNKGame extends JFrame {
 		public void paintComponent(Graphics g) {  // invoke via repaint()
 			super.paintComponent(g);    // fill background
 			setBackground(Color.WHITE); // set its background color
- 
+
 			// Draw the grid-lines
 			g.setColor(Color.LIGHT_GRAY);
 			for (int row = 1; row < B.M; ++row) {
@@ -267,14 +267,14 @@ public class MNKGame extends JFrame {
 				g.fillRoundRect(CELL_SIZE * col - GRID_WIDTH_HALF, 0,
 					GRID_WIDTH, BOARD_HEIGHT-1, GRID_WIDTH, GRID_WIDTH);
 			}
- 
+
 			// Draw the Seeds of all the cells if they are not empty
 			Graphics2D g2d = (Graphics2D)g;
 			g2d.setStroke(new BasicStroke(SYMBOL_STROKE_WIDTH, BasicStroke.CAP_ROUND,
-				BasicStroke.JOIN_ROUND));  
+				BasicStroke.JOIN_ROUND));
 
 			MNKCell[] list = B.getMarkedCells();
- 
+
 			for(MNKCell c : list) {
 				int x1 = c.j * CELL_SIZE + CELL_PADDING;
 				int y1 = c.i * CELL_SIZE + CELL_PADDING;
@@ -289,7 +289,7 @@ public class MNKGame extends JFrame {
 					g2d.setColor(Color.BLUE);
 					g2d.drawOval(x1, y1, SYMBOL_SIZE, SYMBOL_SIZE);
 				}
-			} 
+			}
 
 			// Print status-bar message
 			switch(B.gameState()) {
@@ -322,7 +322,7 @@ public class MNKGame extends JFrame {
 		if(args.length != 3 && args.length != 4 && args.length != 5) {
 			System.err.println("Usage: MNKGame <M> <N> <K> [MNKPlayer class] [MNKPlayer class]");
 			 System.exit(0);
-		}	
+		}
 
 		// Size of the screen
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -369,10 +369,10 @@ public class MNKGame extends JFrame {
 			}
 			catch (Exception e) {
 				System.err.println("  " + e);
-				System.exit(1);	
+				System.exit(1);
 			}
 		}
-		
+
 
 		// Check if the class parameter exists and it is an MNKPlayer implementation
 		if(args.length == 5) {
@@ -396,16 +396,16 @@ public class MNKGame extends JFrame {
 				System.exit(1);
 			}
 		}
-	
+
 		// Select the game type
-		MNKGameType type = args.length == 5 ? MNKGameType.COMPUTERvsCOMPUTER : 
+		MNKGameType type = args.length == 5 ? MNKGameType.COMPUTERvsCOMPUTER :
                        args.length == 4 ? MNKGameType.HUMANvsCOMPUTER    : MNKGameType.HUMANvsHUMAN;
 
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
 				// The constructor setups and runs the game
-				new MNKGame(M,N,K,type); 
+				new MNKGame(M,N,K,type);
 			}
 		});
 	}

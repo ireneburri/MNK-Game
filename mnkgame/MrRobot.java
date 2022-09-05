@@ -36,9 +36,9 @@ public class MrRobot implements MNKPlayer{
     }
 
 
-    public MNKCell selectCell(MNKCell[] MC, MNKCell[] FC){
-
+    public MNKCell selectCell(MNKCell[] FC, MNKCell[] MC){
       long start = System.currentTimeMillis();
+
 
   		if(MC.length > 0) {
   			MNKCell cell = MC[MC.length-1]; // Recover the last move from MC
@@ -51,20 +51,29 @@ public class MrRobot implements MNKPlayer{
 
       //se la prima mossa spetta al mio giocatore può essere effettuata randomicamente
       if(myWin == MNKGameState.WINP1 && MC.length==0){
+        System.out.println("prova1");
   			MNKCell cell = FC[rand.nextInt(FC.length)];
+        System.out.println("prova2");
   			board.markCell(cell.i, cell.j);
   			return cell;
   		}
+
+      /*if(first){
+        MNKCell cell = new MNKCell(1, 1, MNKCellState.P1);
+  			board.markCell(1, 1);
+  			return cell;
+  		}*/
 
       double score = 0, maxEval = Integer.MIN_VALUE;
       int pos = rand.nextInt(FC.length);
       MNKCell result = FC[pos]; // random move
 
+
       for(MNKCell potentialCell : FC) {
 
-        // If time is running out, return the randomly selected  cell
-        // if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)) {
-        // break;
+        //If time is running out, return the randomly selected  cell
+        /* if((System.currentTimeMillis()-start)/1000.0 > TIMEOUT*(99.0/100.0)) {
+        break; */
 
         board.markCell(potentialCell.i, potentialCell.j);
         score = alphabeta(board, true, board.K, Integer.MIN_VALUE, Integer.MAX_VALUE, start, TIMEOUT, first);

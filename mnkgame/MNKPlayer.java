@@ -1,8 +1,8 @@
 /*
  *  Copyright (C) 2021 Pietro Di Lena
- *  
+ *
  *  This file is part of the MNKGame v2.0 software developed for the
- *  students of the course "Algoritmi e Strutture di Dati" first 
+ *  students of the course "Algoritmi e Strutture di Dati" first
  *  cycle degree/bachelor in Computer Science, University of Bologna
  *  A.Y. 2020-2021.
  *
@@ -37,10 +37,10 @@ public interface MNKPlayer {
    * @param N Board columns
    * @param K Number of symbols to be aligned (horizontally, vertically, diagonally) for a win
    * @param first True if it is the first player, False otherwise
-	 * @param timeout_in_secs Maximum amount of time (in seconds) for selectCell 
+	 * @param timeout_in_secs Maximum amount of time (in seconds) for selectCell
    */
-	public void initPlayer(int M, int N, int K, boolean first, int timeout_in_secs);
-	
+	public void initPlayer(int m, int n, int k, boolean first, int timeout);
+
 	/**
 	 * Select a position among those listed in the <code>FC</code> array
 	 *
@@ -50,12 +50,12 @@ public interface MNKPlayer {
    *
    * @return an element of <code>FC</code>
 	 */
-	public MNKCell selectCell(MNKCell[] FC, MNKCell[] MC);	
+	public MNKCell selectCell(MNKCell[] FC, MNKCell[] MC);
 
 	/**
    * Returns the player name
    *
-	 * @return string 
+	 * @return string
    */
 	public String playerName();
 }

@@ -56,6 +56,7 @@ public class RandomPlayer  implements MNKPlayer {
 	/**
    * Selects a random cell in <code>FC</code>
    */
+
 	public MNKCell selectCell(MNKCell[] FC, MNKCell[] MC) {
 		// Uncomment to chech the move timeout
 		/*
@@ -65,6 +66,7 @@ public class RandomPlayer  implements MNKPlayer {
 		catch(Exception e) {
 		}
 		*/
+
 		return FC[rand.nextInt(FC.length)];
 	}
 
