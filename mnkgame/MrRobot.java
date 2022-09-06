@@ -74,7 +74,9 @@ public class MrRobot implements MNKPlayer{
         break; */
 
         board.markCell(potentialCell.i, potentialCell.j);
+        System.out.println("alpha inizio");
         score = alphabeta(board, true, board.K, Integer.MIN_VALUE, Integer.MAX_VALUE, start, TIMEOUT, first);
+        System.out.println("alpha fine");
         if(score > maxEval){
           maxEval = score;
           result = potentialCell;
@@ -170,20 +172,33 @@ public class MrRobot implements MNKPlayer{
       //prendiamo l'ultima cella marcata
   		MNKCell[] MC = board.getMarkedCells();
   		MNKCell lastCell = MC[MC.length-1];
-
+  System.out.println("i "+lastCell.i);
+    System.out.println("j "+lastCell.j);
   		//valuto la riga con ultima cella marcata (+ controlla che ci siano almeno k celle in quella riga)
-  		if(board.M >= board.K){
-  			MNKCellState[] row;
+  		if(board.N >= board.K){
+  			MNKCellState[] row  = new MNKCellState[board.N];
         row = board.B[lastCell.i];
+        System.out.println("provascoreline1");
+          System.out.println(" "+row.length);
   			eval += scoreLine(row, lastCell, lastCell.j, row.length);
+        System.out.println("eval riga "+ eval);
   			//row = null;
   		}
 
       //valuto la colonna con l'ultima cella marcata (+ controlla che ci sono almeno k celle in quella colonna)
-  		if(board.N >= board.K){
-  			MNKCellState[] col;
-  			col = board.B[lastCell.j];
-  			eval += scoreLine(col, lastCell, lastCell.i, col.length);
+  		if(board.M >= board.K){
+        ArrayList<MNKCellState> colList = new ArrayList<MNKCellState>();
+			  for(int i = 0; i < board.M; i++){
+				      colList.add(board.B[i][lastCell.j]);
+         }
+         MNKCellState[] col = new MNKCellState[colList.size()];
+         col = colList.toArray(col);
+
+        System.out.println("provascoreline2");
+        System.out.println(" "+col.length);
+
+        eval += scoreLine(col, lastCell, lastCell.i, col.length);
+        System.out.println("eval col "+ eval);
   			//col = null;
   		}
 
@@ -196,16 +211,45 @@ public class MrRobot implements MNKPlayer{
         x--;
       }
 
+
       while (y >= 0 && x <= board.M-1){
         diagList.add(board.B[x][y]);
         x++;
         y--;
       }
-
+      System.out.println("crea diagonale");
       if(diagList.size() >= board.K){
         MNKCellState[] diag = new MNKCellState[diagList.size()];
         diag = diagList.toArray(diag);
-        eval += scoreLine(diag, lastCell, lastCell.i, diag.length);
+System.out.println("provascoreline3");
+System.out.println("diag "+diag.length);
+
+        /*int[][] matrix= new int[board.M][board.N];
+        int p;
+        int z;
+        if(board.N>board.M){ //matrice orizzontale
+          p=board.M-1;
+          for
+        }
+        else{ //matrice verticale
+          p=board.N-1;
+          z=0;
+          for(int j=p; j>=0;  j--){
+            for(int i=0; i<=board.M-1; i++){
+              matrix[i][j]=z;
+              z++;
+            }
+          }
+
+        }*/
+
+        if(lastCell.i >= lastCell.j){
+          eval += scoreLine(diag, lastCell, lastCell.i, diag.length);
+        }
+        else{
+          eval += scoreLine(diag, lastCell, board.N-1-lastCell.j, diag.length);
+        }
+        System.out.println("eval diag "+ eval);
       }
 
       //valuto la diagonale opposta con l'ultima cella marcata (+ controlla che ci sono almeno k celle in quella colonna)
@@ -227,9 +271,17 @@ public class MrRobot implements MNKPlayer{
       if(diagOppList.size() >= board.K){
         MNKCellState[] diagOpp = new MNKCellState[diagOppList.size()];
         diagOpp = diagOppList.toArray(diagOpp);
-        eval += scoreLine(diagOpp, lastCell, lastCell.i, diagOpp.length);
-      }
+System.out.println("provascoreline4");
+        if(lastCell.i >= lastCell.j){
+         eval += scoreLine(diagOpp, lastCell, lastCell.j, diagOpp.length);
+        }
+        else{
+          eval += scoreLine(diagOpp, lastCell, lastCell.i, diagOpp.length);
+        }
 
+        System.out.println("eval diagOpp "+ eval);
+      }
+System.out.println("eval tot "+ eval);
       return eval;
   	}
 
