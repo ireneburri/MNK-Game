@@ -39,7 +39,7 @@ public interface MNKPlayer {
    * @param first True if it is the first player, False otherwise
 	 * @param timeout_in_secs Maximum amount of time (in seconds) for selectCell
    */
-	public void initPlayer(int m, int n, int k, boolean first, int timeout);
+	public void initPlayer(int M, int N, int K, boolean first, int timeout_in_secs);
 
 	/**
 	 * Select a position among those listed in the <code>FC</code> array

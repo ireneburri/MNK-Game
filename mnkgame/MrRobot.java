@@ -18,21 +18,19 @@ public class MrRobot implements MNKPlayer{
     private MNKGameState myWin;
     private MNKGameState yourWin;
     private int TIMEOUT;
-    private long seconds;
 
 
     public  MrRobot(){
     }
 
-
-    public void initPlayer(int m, int n, int k, boolean first, int timeout){
+    public void initPlayer(int M, int N, int K, boolean first, int timeout_in_secs){
 
       rand    = new Random(System.currentTimeMillis());
-      board = new MNKBoard(m,n,k);
+      board = new MNKBoard(M,N,K);
       this.first = first;
       myWin = first ? MNKGameState.WINP1 : MNKGameState.WINP2;
 		  yourWin = first ? MNKGameState.WINP2 : MNKGameState.WINP1;
-      TIMEOUT = timeout;
+      TIMEOUT = timeout_in_secs;
     }
 
 
@@ -74,9 +72,9 @@ public class MrRobot implements MNKPlayer{
         break; */
 
         board.markCell(potentialCell.i, potentialCell.j);
-        System.out.println("alpha inizio");
+        System.out.println("alpha INIZIO");
         score = alphabeta(board, true, board.K, Integer.MIN_VALUE, Integer.MAX_VALUE, start, TIMEOUT, first);
-        System.out.println("alpha fine");
+        System.out.println("alpha FINE");
         if(score > maxEval){
           maxEval = score;
           result = potentialCell;
@@ -92,44 +90,49 @@ public class MrRobot implements MNKPlayer{
 
 
     //alphabeta pruning
-  	public double alphabeta(MNKBoard board, boolean node, int depth, double alpha, double beta, long start, int timeout, boolean first){
+  	public double alphabeta(MNKBoard board, boolean node, int depth, double alpha, double beta, long start, int timeout_in_secs, boolean first){
 
-      double eval;
+      double eval = 0;
   		MNKCell fc[] = board.getFreeCells();
 
       //poniamo un limite alla profondità dell'albero
       if (depth>8) depth = 8;
 
-  		if(depth <= 0 || board.gameState != MNKGameState.OPEN || (System.currentTimeMillis()-start)/1000.0 > timeout*(99.0/100.0)) {
+  		if( depth <= 0 || board.gameState != MNKGameState.OPEN || (System.currentTimeMillis()-start)/1000.0 > timeout_in_secs*(99.0/100.0)) {
+        System.out.println("entrata in score min");
         eval = score(board, depth, first);
   		}
 
     	else if(node){
         eval = Integer.MAX_VALUE;
 
+System.out.println("iniziofor min");
   			for(MNKCell cell : fc){
   				board.markCell(cell.i, cell.j);
-  				eval = Math.min(eval, alphabeta(board, false, depth-1, alpha, beta, start, timeout, first));
+  				eval = Math.min(eval, alphabeta(board, false, depth-1, alpha, beta, start, timeout_in_secs, first));
   				beta = Math.min(eval, beta);
   				board.unmarkCell();
 
   				if(beta <= alpha)
   					break;
   			}
+        System.out.println("fine for min");
   		}
 
       else{
   			eval = Integer.MIN_VALUE;
 
+System.out.println("iniziofor max");
   			for(MNKCell cell : fc){
   				board.markCell(cell.i, cell.j);
-  				eval = Math.max(eval, alphabeta(board, true, depth-1, alpha, beta, start, timeout, first));
+  				eval = Math.max(eval, alphabeta(board, true, depth-1, alpha, beta, start, timeout_in_secs, first));
   				beta = Math.max(eval, alpha);
   				board.unmarkCell();
 
   				if(beta <= alpha)
   					break;
   			}
+        System.out.println("finefor min");
   		}
 
       return eval;
@@ -142,22 +145,22 @@ public class MrRobot implements MNKPlayer{
 
       //mia vittoria
   		if(board.gameState == myWin){
-        System.out.println("prova1 ");
+        System.out.println("mia win ");
   			eval = 100;
       }
       //vittoria dell'avversario
       else if(board.gameState == yourWin){
-          System.out.println("prova2 ");
+        System.out.println("pareggio ");
   			eval = 0;
   		}
       //pareggio
       else if(board.gameState == MNKGameState.DRAW){
-  System.out.println("prova3 ");
+        System.out.println("avversario win ");
         eval = -100;
   		}
       //incontro un nodo non foglia
       else{
-          System.out.println("prova4 ");
+          System.out.println("chiamata a scorenotleaf ");
         eval = scoreNotLeaf(board);
       }
 
@@ -172,13 +175,13 @@ public class MrRobot implements MNKPlayer{
       //prendiamo l'ultima cella marcata
   		MNKCell[] MC = board.getMarkedCells();
   		MNKCell lastCell = MC[MC.length-1];
-  System.out.println("i "+lastCell.i);
-    System.out.println("j "+lastCell.j);
+      System.out.println("i "+lastCell.i);
+      System.out.println("j "+lastCell.j);
   		//valuto la riga con ultima cella marcata (+ controlla che ci siano almeno k celle in quella riga)
   		if(board.N >= board.K){
   			MNKCellState[] row  = new MNKCellState[board.N];
         row = board.B[lastCell.i];
-        System.out.println("provascoreline1");
+        System.out.println("chiamo scoreline x riga");
           System.out.println(" "+row.length);
   			eval += scoreLine(row, lastCell, lastCell.j, row.length);
         System.out.println("eval riga "+ eval);
@@ -194,7 +197,7 @@ public class MrRobot implements MNKPlayer{
          MNKCellState[] col = new MNKCellState[colList.size()];
          col = colList.toArray(col);
 
-        System.out.println("provascoreline2");
+        System.out.println("chiamo scoreline x col");
         System.out.println(" "+col.length);
 
         eval += scoreLine(col, lastCell, lastCell.i, col.length);
@@ -221,34 +224,10 @@ public class MrRobot implements MNKPlayer{
       if(diagList.size() >= board.K){
         MNKCellState[] diag = new MNKCellState[diagList.size()];
         diag = diagList.toArray(diag);
-System.out.println("provascoreline3");
-System.out.println("diag "+diag.length);
+        System.out.println("chiamo scoreline x diag sx dx");
+        System.out.println("diag "+diag.length);
 
-        /*int[][] matrix= new int[board.M][board.N];
-        int p;
-        int z;
-        if(board.N>board.M){ //matrice orizzontale
-          p=board.M-1;
-          for
-        }
-        else{ //matrice verticale
-          p=board.N-1;
-          z=0;
-          for(int j=p; j>=0;  j--){
-            for(int i=0; i<=board.M-1; i++){
-              matrix[i][j]=z;
-              z++;
-            }
-          }
-
-        }*/
-
-        if(lastCell.i >= lastCell.j){
-          eval += scoreLine(diag, lastCell, lastCell.i, diag.length);
-        }
-        else{
-          eval += scoreLine(diag, lastCell, board.N-1-lastCell.j, diag.length);
-        }
+        eval += scoreLine(diag, lastCell, matrixDiag(lastCell), diag.length);
         System.out.println("eval diag "+ eval);
       }
 
@@ -271,19 +250,86 @@ System.out.println("diag "+diag.length);
       if(diagOppList.size() >= board.K){
         MNKCellState[] diagOpp = new MNKCellState[diagOppList.size()];
         diagOpp = diagOppList.toArray(diagOpp);
-System.out.println("provascoreline4");
-        if(lastCell.i >= lastCell.j){
-         eval += scoreLine(diagOpp, lastCell, lastCell.j, diagOpp.length);
-        }
-        else{
-          eval += scoreLine(diagOpp, lastCell, lastCell.i, diagOpp.length);
-        }
+        System.out.println("chiamo scoreline x diagOpp dx sx");
 
+        eval += scoreLine(diagOpp, lastCell, matrixDiagOpp(lastCell), diagOpp.length);
         System.out.println("eval diagOpp "+ eval);
       }
-System.out.println("eval tot "+ eval);
+      System.out.println("eval tot "+ eval);
       return eval;
   	}
+
+
+    //funzione che crea la matrice per determinare in base a lasCell quale è la sua posizione nell'Arrays della diagonale sx dx
+    public int matrixDiag(MNKCell lastCell){
+
+      int mat[][]= new int[board.M][board.N];
+      int p=0;
+
+      if(board.M > board.N){
+        for(int i=0; i<board.M; i++){
+          for(int j=0; j< board.N-1-i; j++){
+            mat[i][j] = p;
+          }
+          for(int k=i; k< board.M; k++){
+            if (board.N-1-i>0) mat[k][board.N-1-i] = p;
+              else mat[k][0] = p;
+          }
+
+          if(p < board.N-1)
+            p++;
+        }
+      }
+      else{
+        for(int i=0; i<board.M; i++){
+          for(int j=0; j<board.N-1-i; j++){
+            mat[i][j]=p;
+          }
+          for(int k=i; k<board.M; k++){
+            mat[k][board.N-1-i]=p;
+          }
+          p++;
+        }
+       }
+
+       return mat[lastCell.i][lastCell.j];
+    }
+
+
+    //funzione che crea la matrice per determinare in base a lasCell quale è la sua posizione nell'Arrays della diagonale opposta dx sx
+    public int matrixDiagOpp(MNKCell lastCell){
+
+      int mat[][]= new int[board.M][board.N];
+      int p=0;
+
+      if(board.M<board.N){
+        for(int i=0; i<board.M; i++){
+          for(int j=board.N-1; j>=i; j--){
+            mat[i][j] = p;
+          }
+          for(int k=i; k<board.M; k++){
+            mat[k][i] = p;
+          }
+          p++;
+        }
+      }
+      else{
+        for(int i=0; i<board.M; i++){
+            for(int j=board.N-1; j>=i; j--){
+                mat[i][j] = p;
+            }
+            for(int k=i; k<board.M; k++){
+              if(i<board.N) mat[k][i] = p;
+              else mat[k][board.N-1] = p;
+            }
+
+            if(p<board.N-1)
+            p++;
+        }
+    }
+
+       return mat[lastCell.i][lastCell.j];
+    }
 
 
     /*
