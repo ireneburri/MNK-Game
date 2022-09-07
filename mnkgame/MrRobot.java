@@ -100,7 +100,7 @@ public class MrRobot implements MNKPlayer{
 
   		if( depth <= 0 || board.gameState != MNKGameState.OPEN || (System.currentTimeMillis()-start)/1000.0 > timeout_in_secs*(99.0/100.0)) {
         System.out.println("entrata in score min");
-        eval = score(board, depth, first);
+        eval = score(board);
   		}
 
     	else if(node){
@@ -140,7 +140,7 @@ System.out.println("iniziofor max");
 
 
     //valutazione board
-    public double score(MNKBoard board, int depth, boolean first){
+    public double score(MNKBoard board){
   		double eval;
 
       //mia vittoria
@@ -262,7 +262,7 @@ System.out.println("iniziofor max");
 
     //funzione che crea la matrice per determinare in base a lasCell quale è la sua posizione nell'Arrays della diagonale sx dx
     public int matrixDiag(MNKCell lastCell){
-
+System.out.println("matrixDiag entrata");
       int mat[][]= new int[board.M][board.N];
       int p=0;
 
@@ -291,6 +291,7 @@ System.out.println("iniziofor max");
           p++;
         }
        }
+       System.out.println("matrixDiag uscita " + mat[lastCell.i][lastCell.j]);
 
        return mat[lastCell.i][lastCell.j];
     }
@@ -350,17 +351,17 @@ System.out.println("iniziofor max");
       Pareggio 0
     */
     public double scoreLine(MNKCellState[] line, MNKCell lastCell, int x, int fin){
-
+System.out.println("entrata in scoreline");
       double sumScore = 0;
 
       MNKCellState myMove = (myWin == MNKGameState.WINP1)? MNKCellState.P1 : MNKCellState.P2;
 		  MNKCellState yourMove = (yourWin == MNKGameState.WINP2)? MNKCellState.P2 : MNKCellState.P1;
-
+System.out.println("scoreline 1");
       //valutazioni delle varie configurazioni nel caso in cui la cella appena posizionata sia MIA
       if (lastCell.state == myMove){
         values values = maxSubVector(line, myMove);
-
-        if (values.maxEnd - values.maxEnd + 1 >= board.K){
+System.out.println("scoreline 2");
+        if (values.maxEnd - values.maxStart + 1 >= board.K){
 
           if (values.totSelectedCell > board.K/2) sumScore+=40; //caso 1
           else sumScore+=20; //caso 2
@@ -384,22 +385,26 @@ System.out.println("iniziofor max");
 
       //lastCell.state == yourMove: valutazioni delle varie configurazioni nel caso in cui la cella appena posizionata sia dell'AVVERSARIO
       else{
+        System.out.println("scoreline 3");
         MNKCellState[] modifiedOppositeLine = line;
         modifiedOppositeLine[x] = MNKCellState.FREE; //ho annullato la sua ultima cella marcata
         values blockValues = maxSubVector(modifiedOppositeLine, myMove); //voglio calcolare un MIO sottovettore quindi gli passo myMove
 
         if (blockValues.maxEnd - blockValues.maxStart + 1 >= board.K){
-
+System.out.println("scoreline 4");
           if (x >= blockValues.maxStart && x <= blockValues.maxEnd){
-
+System.out.println("scoreline 5");
             if (blockValues.totSelectedCell > board.K/2) sumScore-=60; //caso 6
             else sumScore-=40; //caso 7
           }
         }
-
-        if (riskySituation(line, myMove, fin)) sumScore=100; //caso 8
+System.out.println("scoreline 6");
+        if (riskySituation(line, myMove, fin)) {
+          sumScore=100; //caso 8
+          System.out.println("scoreline 7");
+        }
       }
-
+System.out.println("scoreline 8");
       return sumScore;
     }
 
@@ -423,7 +428,7 @@ System.out.println("iniziofor max");
 
     //restitusco vairabili contenute nella classe values circa il sottovettore max costituito dalle CELLE MARCATE dal giocatore P e CELLE LIBERE
     public values maxSubVector(MNKCellState[] line, MNKCellState P){
-
+System.out.println("maxsubvector");
       int length = 0, maxlength = 0, start = 0, maxStart = 0, end = 0, maxEnd = 0;
       int selectedCell = 0, freeCell = 0, totSelectedCell = 0, totFreeCell = 0;
 
@@ -478,7 +483,7 @@ System.out.println("iniziofor max");
 
     //true se il sottovettoremax costituito SOLO dalle CELLE MARCATE dal giocatore P è lungo k-1 e ha almeno una cella libera adiacente, false altrimenti
     public boolean riskySituation(MNKCellState[] line, MNKCellState P, int fin){
-
+System.out.println("riskySituation");
       boolean risky = false;
       int length = 0, start = 0,  end = 0;
 
@@ -498,7 +503,7 @@ System.out.println("iniziofor max");
         //se mi trovo qua vuol dire che sono in una configurazione finale, non avrò mai length>=k
         if (length == board.K-1){
 
-          if ( (start-1 >=0 && line[start-1] == MNKCellState.FREE) || (end+1 <= fin && line[end+1] == MNKCellState.FREE) ){
+          if ( (start-1 >=0 && line[start-1] == MNKCellState.FREE) || (end+1 < fin && line[end+1] == MNKCellState.FREE) ){
             risky = true;
           }
         }
