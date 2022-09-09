@@ -184,7 +184,9 @@ public class MrRobot implements MNKPlayer{
   			MNKCellState[] row  = new MNKCellState[board.N];
         row = board.B[lastCell.i];
         System.out.println("calcolo scoreline x riga con riga: "+ row.length);
-  			eval = Math.max(eval, scoreLine(row, lastCell, lastCell.j, row.length));
+  			if (Math.abs(eval) < Math.abs(scoreLine(row, lastCell, lastCell.j, row.length))){
+          eval = scoreLine(row, lastCell, lastCell.j, row.length);
+        }
         System.out.println("eval dopo calcolo della riga:"+ eval);
   			//row = null;
   		}
@@ -199,7 +201,9 @@ public class MrRobot implements MNKPlayer{
          col = colList.toArray(col);
 
         System.out.println("calcolo scoreline x col con colonna: "+ col.length);
-        eval = Math.max(eval, scoreLine(col, lastCell, lastCell.i, col.length));
+        if (Math.abs(eval) < Math.abs(scoreLine(col, lastCell, lastCell.i, col.length))){
+          eval = scoreLine(col, lastCell, lastCell.i, col.length);
+        }
         System.out.println("eval dopo calcolo della colonna:"+ eval);
   			//col = null;
   		}
@@ -225,8 +229,9 @@ public class MrRobot implements MNKPlayer{
         MNKCellState[] diag = new MNKCellState[diagList.size()];
         diag = diagList.toArray(diag);
         System.out.println("calcolo scoreline x col con diagonale principale: "+ diag.length);
-
-        eval = Math.max(eval, scoreLine(diag, lastCell, matrixDiag(lastCell), diag.length));
+        if (Math.abs(eval) < Math.abs(scoreLine(diag, lastCell, matrixDiag(lastCell), diag.length))){
+          eval = scoreLine(diag, lastCell, matrixDiag(lastCell), diag.length);
+        }
         System.out.println("eval dopo calcolo della diagonale opposta:"+ eval);
       }
 
@@ -252,7 +257,9 @@ public class MrRobot implements MNKPlayer{
         diagOpp = diagOppList.toArray(diagOpp);
         System.out.println("calcolo scoreline x col con diagonale secondaria: "+ diagOpp.length);
 
-        eval = Math.max(eval, scoreLine(diagOpp, lastCell, matrixDiagOpp(lastCell), diagOpp.length));
+        if (Math.abs(eval) < Math.abs(scoreLine(diagOpp, lastCell, matrixDiagOpp(lastCell), diagOpp.length))){
+          eval = scoreLine(diagOpp, lastCell, matrixDiagOpp(lastCell), diagOpp.length);
+        }
         System.out.println("eval dopo calcolo della diagonale inversa :"+ eval);
       }
       System.out.println("eval tot "+ eval);
@@ -493,7 +500,7 @@ public class MrRobot implements MNKPlayer{
       int length = 0, maxlength = 0, start = 0, maxStart = 0, end = 0, maxEnd = 0;
       int selectedCell = 0, freeCell = 0, totSelectedCell = 0, totFreeCell = 0;
 
-      for (int i=0; i<=line.length-1; i++){
+      for (int i=0; i<line.length-1; i++){
 
         if (line[i] == P || line[i] == MNKCellState.FREE){
           length = length + 1;
@@ -549,7 +556,7 @@ public class MrRobot implements MNKPlayer{
       int length = 0, start = 0,  end = 0;
 
       //calcolo un sottovettore massimo (NON considerando le celle libere) lungo k con celle libere accanto
-      for (int i=0; i<=line.length-1 && risky==false; i++){   //AND o OR ? !!!!!!
+      for (int i=0; i<line.length-1 && risky==false; i++){   //AND o OR ? !!!!!!
 
         if (line[i] == P){
           length = length + 1;
