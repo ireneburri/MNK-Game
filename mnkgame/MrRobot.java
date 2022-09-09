@@ -73,7 +73,7 @@ public class MrRobot implements MNKPlayer{
 
         board.markCell(potentialCell.i, potentialCell.j);
         System.out.println("alpha INIZIO");
-        score = alphabeta(board, true, 3, Integer.MIN_VALUE, Integer.MAX_VALUE, start, TIMEOUT, first);
+        score = alphabeta(board, true, 0, Integer.MIN_VALUE, Integer.MAX_VALUE, start, TIMEOUT, first);
         System.out.println("alpha FINE");
         if(score > maxEval){
           maxEval = score;
