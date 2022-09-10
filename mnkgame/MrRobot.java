@@ -146,12 +146,12 @@ public class MrRobot implements MNKPlayer{
       //mia vittoria
   		if(board.gameState == myWin){
         System.out.println("mia win !!!!!!!!!!!!!");
-  			eval = -1000;
+  			eval = 1000;
       }
       //vittoria dell'avversario
       else if(board.gameState == yourWin){
         System.out.println("avversario win !!!!!!!!!!!!!!!");
-  			eval = 1000;
+  			eval = -1000;
   		}
       //pareggio
       else if(board.gameState == MNKGameState.DRAW){
