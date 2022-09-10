@@ -73,9 +73,10 @@ public class MrRobot implements MNKPlayer{
 
         board.markCell(potentialCell.i, potentialCell.j);
         System.out.println("alpha INIZIO");
-        score = alphabeta(board, true, 0, Integer.MIN_VALUE, Integer.MAX_VALUE, start, TIMEOUT, first);
+        score = alphabeta(board, true, 3, Integer.MIN_VALUE, Integer.MAX_VALUE, start, TIMEOUT, first);
         System.out.println("alpha FINE");
-        if(score > maxEval){
+        //if(Math.abs(score) > Math.abs(maxEval)){
+        if (score > maxEval){
           maxEval = score;
           result = potentialCell;
         }
@@ -104,7 +105,7 @@ public class MrRobot implements MNKPlayer{
 
   		if( depth <= 0 || board.gameState != MNKGameState.OPEN || (System.currentTimeMillis()-start)/1000.0 > timeout_in_secs*(99.0/100.0)) {
         System.out.println("calcolo dello score per le combinazioni a profondità 0");
-        eval = score(board);
+        eval = score(board, depth);
   		}
 
     	else if(node){
@@ -140,18 +141,20 @@ public class MrRobot implements MNKPlayer{
 
 
     //valutazione board
-    public double score(MNKBoard board){
+    public double score(MNKBoard board, int depth){
   		double eval;
 
       //mia vittoria
   		if(board.gameState == myWin){
         System.out.println("mia win !!!!!!!!!!!!!");
   			eval = 1000;
+        eval = eval - (3 - depth);
       }
       //vittoria dell'avversario
       else if(board.gameState == yourWin){
         System.out.println("avversario win !!!!!!!!!!!!!!!");
   			eval = -1000;
+        eval = eval + (3 - depth);
   		}
       //pareggio
       else if(board.gameState == MNKGameState.DRAW){
